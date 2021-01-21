@@ -70,7 +70,7 @@ TRAINER_DARWIN_CUSTOM_COMMANDS = [['brew', 'update'],
 class PostInstall(install):
 
     def run(self):
-        deps = 'https://github.com/leigh-johnson/Tensorflow-bin/releases/download/v2.2.0/tensorflow-2.2.0-cp37-cp37m-linux_armv7l.whl'
+        deps = 'https://github.com/bitsy-ai/tensorflow-arm-bin/releases/download/v2.4.0-rc2/tensorflow-2.4.0rc2-cp37-none-linux_armv7l.whl'
 
         install.run(self)
         # https://pip.pypa.io/en/stable/user_guide/#using-pip-from-your-program

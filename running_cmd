@@ -1,0 +1,3 @@
+source ~/.rpi-deep/bin/activate
+sh install.sh
+rpi-deep-pantilt detect --loglevel=DEBUG --edge-tpu

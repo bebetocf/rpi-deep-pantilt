@@ -107,6 +107,9 @@ def run_stationary_detect(labels, model_cls, rotation):
 
                     overlay = model.create_overlay(frame, filtered_prediction)
                     capture_manager.overlay_buff = overlay
+                    # for class_name in prediction.get('detection_classes'):
+                    #     logging.info(
+                    #         f'Tracking {class_name}')
 
                 if LOGLEVEL is logging.DEBUG and (time.time() - start_time) > 1:
                     fps_counter += 1
