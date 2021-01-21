@@ -111,12 +111,9 @@ def run_stationary_detect(labels, model_cls, rotation):
                     #     logging.info(
                     #         f'Tracking {class_name}')
 
-                if LOGLEVEL is logging.DEBUG and (time.time() - start_time) > 1:
-                    fps_counter += 1
-                    fps = fps_counter / (time.time() - start_time)
-                    logging.debug(f'FPS: {fps}')
-                    fps_counter = 0
-                    start_time = time.time()
+                # logging.debug(f'time: {(time.time() - start_time) * 1000}ms')
+                logging.debug(f'FPS: {1 / (time.time() - start_time)}ms')
+                start_time = time.time()
     except KeyboardInterrupt:
         capture_manager.stop()
 
