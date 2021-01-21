@@ -17,6 +17,10 @@ from rpi_deep_pantilt.detect.facessd_mobilenet_v2 import (
     FaceSSD_MobileNet_V2_EdgeTPU,
     LABELS as FaceSSDLabels
 )
+from rpi_deep_pantilt.detect.ssdlite_mobiledet_ssl import (
+    SSDMobileDet_SSL_EdgeTPU_Quant,
+    LABELS as SSDMobileDetSSLLabels
+)
 from rpi_deep_pantilt.control.manager import pantilt_process_manager
 from rpi_deep_pantilt.control.hardware_test import pantilt_test, camera_test
 
@@ -65,7 +69,9 @@ def detect(labels, loglevel, edge_tpu, rotation):
     logging.getLogger().setLevel(level)
 
     # TypeError: nargs=-1 in combination with a default value is not supported.
-    if not labels:
+    if 'ssl' in labels:
+        labels = SSDMobileDetSSLLabels
+    elif not labels:
         labels = SSDMobileNetLabels
     # Sanity-check provided labels are supported by model
     else:
@@ -79,8 +85,10 @@ def detect(labels, loglevel, edge_tpu, rotation):
             '''
         )
 
+    if 'ssl' in labels:
+        model_cls = SSDMobileDet_SSL_EdgeTPU_Quant
     # FaceSSD model
-    if 'face' in labels:
+    elif 'face' in labels:
         if edge_tpu:
             model_cls = FaceSSD_MobileNet_V2_EdgeTPU
         else:
