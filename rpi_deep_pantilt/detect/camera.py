@@ -79,7 +79,7 @@ def run_stationary_detect(labels, model_cls, rotation):
     '''
     model = model_cls()
 
-    capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation)
+    capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation, framerate=90)
     capture_manager.start()
     capture_manager.start_overlay()
 
