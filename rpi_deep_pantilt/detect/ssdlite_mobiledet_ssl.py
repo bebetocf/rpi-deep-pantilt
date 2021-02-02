@@ -47,6 +47,8 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
 
         self.model_path = rpi_deep_pantilt_path[0] + '/models' + f'/{self.tflite_model_file}'
 
+        self.model_path = "/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_70_30_whole_50000/mobilenet_70_30_whole_50000_edgetpu.tflite"
+        
         try:
             from tflite_runtime import interpreter as coral_tflite_interpreter
         except ImportError as e:
@@ -59,7 +61,8 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
         self.tflite_interpreter = coral_tflite_interpreter.Interpreter(
             model_path=self.model_path,
             experimental_delegates=[
-                tf.lite.experimental.load_delegate(self.EDGETPU_SHARED_LIB)
+                tf.lite.experimental.load_delegate(self.EDGETPU_SHARED_LIB,
+                               {'device': device[0]} if device else {})
             ]
         )
 
