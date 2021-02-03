@@ -111,7 +111,7 @@ def run_stationary_detect(labels, model_cls, rotation):
                     #     logging.info(
                     #         f'Tracking {class_name}')
 
-                # logging.debug(f'time: {(time.time() - start_time) * 1000}ms')
+                # logging.info(f'time: {(time.time() - start_time) * 1000}ms')
                 logging.info(f'FPS: {1 / (time.time() - start_time)}')
                 start_time = time.time()
     except KeyboardInterrupt:
@@ -173,6 +173,9 @@ class PiCameraStream(object):
         self.stopped = False
         logging.info('starting camera preview')
         self.camera.start_preview()
+        # self.camera.start_recording('/home/ssl/Documents/detection_videos/' 
+        #                 + time.strftime("%d_%m_%Y-%H_%M_%S", time.localtime() + '.h264')
+        # time.sleep(1)
 
     def render_overlay(self):
         while True:
@@ -210,3 +213,4 @@ class PiCameraStream(object):
 
     def stop(self):
         self.stopped = True
+        # self.camera.stop_recording()
