@@ -11,7 +11,7 @@ from threading import Thread
 logging.basicConfig()
 LOGLEVEL = logging.getLogger().getEffectiveLevel()
 
-RESOLUTION = (320, 320)
+RESOLUTION = (224, 224)
 
 logging.basicConfig()
 
@@ -112,7 +112,7 @@ def run_stationary_detect(labels, model_cls, rotation):
                     #         f'Tracking {class_name}')
 
                 # logging.debug(f'time: {(time.time() - start_time) * 1000}ms')
-                logging.debug(f'FPS: {1 / (time.time() - start_time)}ms')
+                logging.info(f'FPS: {1 / (time.time() - start_time)}')
                 start_time = time.time()
     except KeyboardInterrupt:
         capture_manager.stop()

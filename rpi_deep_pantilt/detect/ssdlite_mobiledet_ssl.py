@@ -61,8 +61,7 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
         self.tflite_interpreter = coral_tflite_interpreter.Interpreter(
             model_path=self.model_path,
             experimental_delegates=[
-                tf.lite.experimental.load_delegate(self.EDGETPU_SHARED_LIB,
-                               {'device': device[0]} if device else {})
+                tf.lite.experimental.load_delegate(self.EDGETPU_SHARED_LIB)
             ]
         )
 
