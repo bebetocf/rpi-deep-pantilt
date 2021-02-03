@@ -85,7 +85,7 @@ def detect(labels, loglevel, edge_tpu, rotation):
             '''
         )
 
-    if 'ssl' in labels:
+    if 'robot' in labels:
         model_cls = SSDMobileDet_SSL_EdgeTPU_Quant
     # FaceSSD model
     elif 'face' in labels:
