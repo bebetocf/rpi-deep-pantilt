@@ -120,9 +120,9 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
             output_dict['detection_scores'],
             self.category_index,
             use_normalized_coordinates=True,
-            line_thickness=4,
+            line_thickness=2,
             min_score_thresh=self.min_score_thresh,
-            max_boxes_to_draw=3
+            max_boxes_to_draw=None
         )
 
         img = Image.fromarray(image_np)
