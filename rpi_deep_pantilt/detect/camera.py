@@ -81,7 +81,9 @@ def run_stationary_detect(labels, model_cls, rotation):
 
     capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation, framerate=90)
     capture_manager.start()
-    capture_manager.start_overlay()
+    draw_boxes = False
+    if draw_boxes:
+        capture_manager.start_overlay()
 
     label_idxs = model.label_to_category_index(labels)
     start_time = time.time()
@@ -105,14 +107,15 @@ def run_stationary_detect(labels, model_cls, rotation):
                     except AttributeError:
                         filtered_prediction = prediction
 
-                    overlay = model.create_overlay(frame, filtered_prediction)
-                    capture_manager.overlay_buff = overlay
+                    if draw_boxes:
+                        overlay = model.create_overlay(frame, filtered_prediction)
+                        capture_manager.overlay_buff = overlay
                     # for class_name in prediction.get('detection_classes'):
                     #     logging.info(
                     #         f'Tracking {class_name}')
 
-                # logging.info(f'time: {(time.time() - start_time) * 1000}ms')
-                logging.info(f'FPS: {1 / (time.time() - start_time)}')
+                logging.info(f'det - time: {(time.time() - start_time) * 1000}ms')
+                # logging.info(f'det - FPS: {1 / (time.time() - start_time)}')
                 start_time = time.time()
     except KeyboardInterrupt:
         capture_manager.stop()
