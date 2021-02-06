@@ -73,15 +73,15 @@ def run_pantilt_detect(center_x, center_y, labels, model_cls, rotation, resoluti
                 start_time = time.time()
 
 
-def run_stationary_detect(labels, model_cls, rotation):
+def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes):
     '''
         Overlay is rendered around all tracked objects
     '''
     model = model_cls()
+    model.set_model_path(model_path)
 
     capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation, framerate=90)
     capture_manager.start()
-    draw_boxes = False
     if draw_boxes:
         capture_manager.start_overlay()
 

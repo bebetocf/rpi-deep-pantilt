@@ -1,3 +1,5 @@
 source ~/.rpi-deep/bin/activate
 sh install.sh
-rpi-deep-pantilt detect --loglevel=DEBUG --edge-tpu
+rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl \
+    --model_path=/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_90_10_whole_50000/mobilenet_90_10_whole_50000_edgetpu.tflite \
+    --draw_overlay

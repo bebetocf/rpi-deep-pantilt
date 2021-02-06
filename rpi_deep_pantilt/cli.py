@@ -44,9 +44,12 @@ def cli():
 @cli.command()
 @click.argument('labels', nargs=-1)
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='Run object detection without pan-tilt controls. Pass --loglevel=DEBUG to inspect FPS.')
+@click.option('--model_path', required=False, type=str, default=None, help='Path to ssl model')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
+@click.option('--ssl', is_flag=True, required=False, type=bool, default=False, help='Set to use ssl model')
+@click.option('--draw_overlay', is_flag=True, required=False, type=bool, default=False, help='Flag to draw overlay')
 @click.option('--rotation', default=0, type=int, help='PiCamera rotation. If you followed this guide, a rotation value of 0 is correct. https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134')
-def detect(labels, loglevel, edge_tpu, rotation):
+def detect(labels, model_path, loglevel, ssl, edge_tpu, draw_overlay, rotation):
     '''
         rpi-deep-pantilt detect [OPTIONS] [LABELS]...
 
@@ -69,7 +72,7 @@ def detect(labels, loglevel, edge_tpu, rotation):
     logging.getLogger().setLevel(level)
 
     # TypeError: nargs=-1 in combination with a default value is not supported.
-    if 'ssl' in labels:
+    if ssl:
         labels = SSDMobileDetSSLLabels
     elif not labels:
         labels = SSDMobileNetLabels
@@ -85,7 +88,7 @@ def detect(labels, loglevel, edge_tpu, rotation):
             '''
         )
 
-    if 'robot' in labels:
+    if ssl:
         model_cls = SSDMobileDet_SSL_EdgeTPU_Quant
     # FaceSSD model
     elif 'face' in labels:
@@ -101,7 +104,7 @@ def detect(labels, loglevel, edge_tpu, rotation):
             model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
 
     logging.warning(f'Detecting labels: {labels}')
-    run_stationary_detect(labels, model_cls, rotation)
+    run_stationary_detect(labels, model_cls, model_path, rotation, draw_overlay)
 
 
 @cli.command()

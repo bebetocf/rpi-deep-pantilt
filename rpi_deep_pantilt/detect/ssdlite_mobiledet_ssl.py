@@ -45,8 +45,6 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
 
         self.min_score_thresh = min_score_thresh
 
-        self.model_path = rpi_deep_pantilt_path[0] + '/models' + f'/{self.tflite_model_file}'
-
         self.model_path = "/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_70_30_whole_50000/mobilenet_70_30_whole_50000_edgetpu.tflite"
         
         try:
@@ -90,6 +88,9 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
                 lambda x: x['name'] in labels, self.category_index.values()
             )
         ))
+
+    def set_model_path(self, m_path):
+        self.model_path = m_path
 
     def label_display_name_by_idx(self, idx):
         return self.category_index[idx]['display_name']
@@ -188,6 +189,10 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
             class_data, axis=[0]).numpy().astype(np.int64) + 1
         box_data = tf.squeeze(box_data, axis=[0]).numpy()
         score_data = tf.squeeze(score_data, axis=[0]).numpy()
+
+        # logging.info(box_data)
+        # logging.info(class_data)
+        # logging.info(score_data)
 
         return {
             'detection_boxes': box_data,

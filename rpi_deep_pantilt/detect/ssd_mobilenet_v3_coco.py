@@ -92,6 +92,9 @@ class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
             )
         ))
 
+    def set_model_path(self, m_path):
+        pass
+
     def label_display_name_by_idx(self, idx):
         return self.category_index[idx]['display_name']
 
