@@ -48,8 +48,9 @@ def cli():
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
 @click.option('--ssl', is_flag=True, required=False, type=bool, default=False, help='Set to use ssl model')
 @click.option('--draw_overlay', is_flag=True, required=False, type=bool, default=False, help='Flag to draw overlay')
+@click.option('--csv', is_flag=True, required=False, type=bool, default=False, help='Flag to save detections on csv')
 @click.option('--rotation', default=0, type=int, help='PiCamera rotation. If you followed this guide, a rotation value of 0 is correct. https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134')
-def detect(labels, model_path, loglevel, ssl, edge_tpu, draw_overlay, rotation):
+def detect(labels, model_path, loglevel, ssl, edge_tpu, draw_overlay,csv, rotation):
     '''
         rpi-deep-pantilt detect [OPTIONS] [LABELS]...
 
@@ -104,7 +105,7 @@ def detect(labels, model_path, loglevel, ssl, edge_tpu, draw_overlay, rotation):
             model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
 
     logging.warning(f'Detecting labels: {labels}')
-    run_stationary_detect(labels, model_cls, model_path, rotation, draw_overlay)
+    run_stationary_detect(labels, model_cls, model_path, rotation, draw_overlay, csv)
 
 
 @cli.command()

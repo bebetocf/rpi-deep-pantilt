@@ -73,12 +73,22 @@ def run_pantilt_detect(center_x, center_y, labels, model_cls, rotation, resoluti
                 start_time = time.time()
 
 
-def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes):
+def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, log_csv):
     '''
         Overlay is rendered around all tracked objects
     '''
     model = model_cls()
     model.set_model_path(model_path)
+
+    if log_csv:
+        import csv
+        csv_file = open('/home/ssl/Documents/detection_csv/' 
+                         + time.strftime("%d_%m_%Y-%H_%M_%S", time.localtime()) + '.csv', 'w')
+        csv_writer = csv.writer(csv_file)
+        
+        csv_writer.writerow([item for sublist in [f'ymin{i};xmin{i};ymax{i};xmax{i}'.split(';') for i in range(10)] for item in sublist]
+                            + [f'class{i}' for i in range(10)]
+                            + [f'score{i}' for i in range(10)])
 
     capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation, framerate=90)
     capture_manager.start()
@@ -107,6 +117,10 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes):
                     except AttributeError:
                         filtered_prediction = prediction
 
+                    if log_csv:
+                        csv_writer.writerow(np.concatenate((np.array(filtered_prediction['detection_boxes']).ravel(),
+                                            np.array(filtered_prediction['detection_classes']),
+                                            np.array(filtered_prediction['detection_scores']))))
                     if draw_boxes:
                         overlay = model.create_overlay(frame, filtered_prediction)
                         capture_manager.overlay_buff = overlay
@@ -177,7 +191,7 @@ class PiCameraStream(object):
         logging.info('starting camera preview')
         self.camera.start_preview()
         # self.camera.start_recording('/home/ssl/Documents/detection_videos/' 
-        #                 + time.strftime("%d_%m_%Y-%H_%M_%S", time.localtime() + '.h264')
+        #                 + time.strftime("%d_%m_%Y-%H_%M_%S", time.localtime()) + '.h264')
         # time.sleep(1)
 
     def render_overlay(self):
