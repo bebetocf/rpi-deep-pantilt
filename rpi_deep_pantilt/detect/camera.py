@@ -88,7 +88,8 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
         
         csv_writer.writerow([item for sublist in [f'ymin{i};xmin{i};ymax{i};xmax{i}'.split(';') for i in range(10)] for item in sublist]
                             + [f'class{i}' for i in range(10)]
-                            + [f'score{i}' for i in range(10)])
+                            + [f'score{i}' for i in range(10)]
+                            + ['detection_time_ms'])
 
     capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation, framerate=90)
     capture_manager.start()
@@ -116,11 +117,6 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                         prediction, label_idxs)
                     except AttributeError:
                         filtered_prediction = prediction
-
-                    if log_csv:
-                        csv_writer.writerow(np.concatenate((np.array(filtered_prediction['detection_boxes']).ravel(),
-                                            np.array(filtered_prediction['detection_classes']),
-                                            np.array(filtered_prediction['detection_scores']))))
                     if draw_boxes:
                         overlay = model.create_overlay(frame, filtered_prediction)
                         capture_manager.overlay_buff = overlay
@@ -128,7 +124,14 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                     #     logging.info(
                     #         f'Tracking {class_name}')
 
-                logging.info(f'det - time: {(time.time() - start_time) * 1000}ms')
+                detection_time_ms = (time.time() - start_time) * 1000
+                logging.info(f'det - time: {detection_time_ms}ms')
+
+                if log_csv:
+                    csv_writer.writerow(np.concatenate((np.array(filtered_prediction['detection_boxes']).ravel(),
+                                        np.array(filtered_prediction['detection_classes']),
+                                        np.array(filtered_prediction['detection_scores']),
+                                        np.array([detection_time_ms]))))
                 # logging.info(f'det - FPS: {1 / (time.time() - start_time)}')
                 start_time = time.time()
     except KeyboardInterrupt:
