@@ -109,9 +109,10 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
                      for i, v in enumerate(prediction.get('detection_scores'))])
         }
 
-    def create_overlay(self, image_np, output_dict):
+    def create_overlay(self, image_np, output_dict, video_path):
 
-        image_np = image_np.copy()
+        if not video_path:
+            image_np = image_np.copy()
 
         # draw bounding boxes
         visualize_boxes_and_labels_on_image_array(

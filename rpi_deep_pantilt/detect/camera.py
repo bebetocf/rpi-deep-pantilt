@@ -84,6 +84,7 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
         import csv
         csv_file = open('/home/ssl/Documents/detection_csv/' 
                         + ((video_path.split('.')[0].split('/')[-1] + '_') if video_path else '')
+                        + ('overlay_' if draw_boxes else '')
                         + time.strftime("%d_%m_%Y-%H_%M_%S", time.localtime()) + '.csv', 'w')
         csv_writer = csv.writer(csv_file)
         
@@ -100,8 +101,8 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
     if video_path:
         import cv2
         cap = cv2.VideoCapture(video_path)
-        # out = cv2.VideoWriter(video_path.split('.')[0] + '_detect.' + video_path.split('.')[1],
-        #                         cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 60, (224, 224))
+        out = cv2.VideoWriter(video_path.split('.')[0] + '_detect.' + video_path.split('.')[1],
+                                cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (224, 224))
     else: 
         capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation, framerate=90)
         capture_manager.start()
@@ -131,14 +132,19 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                     except AttributeError:
                         filtered_prediction = prediction
                     if draw_boxes:
-                        overlay = model.create_overlay(frame, filtered_prediction)
-                        capture_manager.overlay_buff = overlay
+                        overlay = model.create_overlay(frame, filtered_prediction, video_path)
+                        if not video_path:
+                            capture_manager.overlay_buff = overlay
                     # for class_name in prediction.get('detection_classes'):
                     #     logging.info(
                     #         f'Tracking {class_name}')
 
                 detection_time_ms = (time.time() - start_time) * 1000
                 logging.info(f'det - time: {detection_time_ms}ms')
+
+                if video_path:
+                    output_rgb = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                    out.write(output_rgb)
 
                 if log_csv:
                     csv_writer.writerow(np.concatenate((np.array(filtered_prediction['detection_boxes']).ravel(),
@@ -148,7 +154,11 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                 # logging.info(f'det - FPS: {1 / (time.time() - start_time)}')
                 start_time = time.time()
     except KeyboardInterrupt:
-        capture_manager.stop()
+        if video_path:
+            out.release()
+            cap.release()
+        else:
+            capture_manager.stop()
 
 
 def _monkey_patch_picamera(overlay):
