@@ -101,8 +101,9 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
     if video_path:
         import cv2
         cap = cv2.VideoCapture(video_path)
-        out = cv2.VideoWriter(video_path.split('.')[0] + '_detect.' + video_path.split('.')[1],
-                                cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (224, 224))
+        if draw_boxes:
+            out = cv2.VideoWriter(video_path.split('.')[0] + '_detect.' + video_path.split('.')[1],
+                                    cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (224, 224))
     else: 
         capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation, framerate=90)
         capture_manager.start()
