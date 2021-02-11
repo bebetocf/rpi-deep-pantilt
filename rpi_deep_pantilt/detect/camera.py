@@ -142,7 +142,7 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                 detection_time_ms = (time.time() - start_time) * 1000
                 logging.info(f'det - time: {detection_time_ms}ms')
 
-                if video_path:
+                if video_path and draw_boxes:
                     output_rgb = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                     out.write(output_rgb)
 
@@ -155,8 +155,9 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                 start_time = time.time()
     except KeyboardInterrupt:
         if video_path:
-            out.release()
             cap.release()
+            if draw_boxes:
+                out.release()
         else:
             capture_manager.stop()
 
