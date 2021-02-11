@@ -73,7 +73,7 @@ def run_pantilt_detect(center_x, center_y, labels, model_cls, rotation, resoluti
                 start_time = time.time()
 
 
-def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, log_csv):
+def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, log_csv, video_path):
     '''
         Overlay is rendered around all tracked objects
     '''
@@ -83,7 +83,8 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
     if log_csv:
         import csv
         csv_file = open('/home/ssl/Documents/detection_csv/' 
-                         + time.strftime("%d_%m_%Y-%H_%M_%S", time.localtime()) + '.csv', 'w')
+                        + ((video_path.split('.')[0].split('/')[-1] + '_') if video_path else '')
+                        + time.strftime("%d_%m_%Y-%H_%M_%S", time.localtime()) + '.csv', 'w')
         csv_writer = csv.writer(csv_file)
         
         csv_writer.writerow([item for sublist in [f'ymin{i};xmin{i};ymax{i};xmax{i}'.split(';') for i in range(10)] for item in sublist]
@@ -91,19 +92,31 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                             + [f'score{i}' for i in range(10)]
                             + ['detection_time_ms'])
 
-    capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation, framerate=90)
-    capture_manager.start()
-    if draw_boxes:
-        capture_manager.start_overlay()
 
     label_idxs = model.label_to_category_index(labels)
     start_time = time.time()
     fps_counter = 0
 
+    if video_path:
+        import cv2
+        cap = cv2.VideoCapture(video_path)
+        # out = cv2.VideoWriter(video_path.split('.')[0] + '_detect.' + video_path.split('.')[1],
+        #                         cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 60, (224, 224))
+    else: 
+        capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation, framerate=90)
+        capture_manager.start()
+        if draw_boxes:
+            capture_manager.start_overlay()
+
     try:
-        while not capture_manager.stopped:
-            if capture_manager.frame is not None:
-                frame = capture_manager.read()
+        while (not video_path and not capture_manager.stopped) or (video_path and cap.isOpened()):
+            if video_path or capture_manager.frame is not None:
+                if video_path:
+                    _, frame = cap.read()
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                else:
+                    frame = capture_manager.read()
+
                 prediction = model.predict(frame)
 
                 if not len(prediction.get('detection_boxes')):

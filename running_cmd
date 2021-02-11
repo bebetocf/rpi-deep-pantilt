@@ -2,4 +2,5 @@ source ~/.rpi-deep/bin/activate
 sh install.sh
 rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl --csv \
     --model_path=/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_90_10_whole_50000/mobilenet_90_10_whole_50000_edgetpu.tflite \
+    --video_path=/home/ssl/Documents/detection_videos/video1.mp4 \
     --draw_overlay
