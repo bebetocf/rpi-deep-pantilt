@@ -73,7 +73,7 @@ def run_pantilt_detect(center_x, center_y, labels, model_cls, rotation, resoluti
                 start_time = time.time()
 
 
-def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, log_csv, video_path):
+def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, log_csv, video_path, save_frame_path, save_frame_freq):
     '''
         Overlay is rendered around all tracked objects
     '''
@@ -104,6 +104,19 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
         if draw_boxes:
             out = cv2.VideoWriter(video_path.split('.')[0] + '_detect.' + video_path.split('.')[1],
                                     cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (224, 224))
+        if save_frame_path:
+            import os
+            full_path = os.path.join(save_frame_path, video_path.split('.')[0].split('/')[-1])
+            if not os.path.exists(full_path):
+                os.mkdir(full_path)
+            frames_path = os.path.join(full_path, 'frames')
+            if not os.path.exists(frames_path):
+                os.mkdir(frames_path)
+            detection_path = os.path.join(full_path, 'detection')
+            if not os.path.exists(detection_path):
+                os.mkdir(detection_path)
+            frame_count = -1
+
     else: 
         capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation, framerate=90)
         capture_manager.start()
@@ -116,6 +129,7 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                 if video_path:
                     _, frame = cap.read()
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    frame_count = frame_count + 1
                 else:
                     frame = capture_manager.read()
 
@@ -143,9 +157,26 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                 detection_time_ms = (time.time() - start_time) * 1000
                 logging.info(f'det - time: {detection_time_ms}ms')
 
-                if video_path and draw_boxes:
-                    output_rgb = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                    out.write(output_rgb)
+                if video_path:
+                    if draw_boxes:
+                        output_rgb = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                        out.write(output_rgb)
+                    if save_frame_path and not (frame_count % save_frame_freq):
+                        count_string = f'{frame_count:05d}'
+                        cv2.imwrite(os.path.join(frames_path, count_string + '.jpg'), cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+                        det_frame_file = open(os.path.join(detection_path, count_string + '.txt'), 'w')
+                        for qtd_detection in range(10):
+                            if filtered_prediction['detection_scores'][qtd_detection] < 0.5:
+                                break
+                            det_frame_file.write(str(filtered_prediction['detection_classes'][qtd_detection] - 1) + ' ')
+                            # bb_line = " ".join([f'{abs(item):.6f}' for item in filtered_prediction['detection_boxes'][qtd_detection]])
+                            box_det = filtered_prediction['detection_boxes'][qtd_detection]
+                            bb_line = (f'{((box_det[1] + box_det[3]) / 2):.6f}' + ' ' + \
+                                        f'{((box_det[0] + box_det[2]) / 2):.6f}' + ' ' + \
+                                        f'{(box_det[3] - box_det[1]):.6f}' + ' ' + \
+                                        f'{(box_det[2] - box_det[0]):.6f}')
+                            det_frame_file.write(bb_line + '\n')
+                        det_frame_file.close()
 
                 if log_csv:
                     csv_writer.writerow(np.concatenate((np.array(filtered_prediction['detection_boxes']).ravel(),

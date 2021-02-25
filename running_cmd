@@ -3,4 +3,13 @@ sh install.sh
 rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl --csv \
     --model_path=/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_90_10_whole_50000/mobilenet_90_10_whole_50000_edgetpu.tflite \
     --video_path=/home/ssl/Documents/detection_videos/video2.mp4 \
+    --save_frame_path=/home/ssl/Documents/detection_frames \
+    --save_frame_freq=30 \
     --draw_overlay
+
+
+rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl \
+    --model_path=/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_90_10_whole_50000/mobilenet_90_10_whole_50000_edgetpu.tflite \
+    --video_path=/home/ssl/Documents/detection_videos/video2.mp4 \
+    --save_frame_path=/home/ssl/Documents/detection_frames \
+    --save_frame_freq=30
