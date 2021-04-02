@@ -73,7 +73,7 @@ def run_pantilt_detect(center_x, center_y, labels, model_cls, rotation, resoluti
                 start_time = time.time()
 
 
-def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, log_csv, video_path, save_frame_path, save_frame_freq, imgs_path, det_path):
+def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, log_csv, video_path, save_frame_path, save_frame_freq, imgs_path, det_path, input_size):
     '''
         Overlay is rendered around all tracked objects
     '''
@@ -150,7 +150,7 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                 else:
                     frame = capture_manager.read()
 
-                prediction = model.predict(frame, is_yolo_det)
+                prediction = model.predict(frame, is_yolo_det, input_size)
 
                 if not len(prediction.get('detection_boxes')):
                     continue

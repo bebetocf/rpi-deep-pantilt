@@ -132,7 +132,7 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
 
         return img.tobytes()
 
-    def predict(self, image, is_yolo_det):
+    def predict(self, image, is_yolo_det, input_size):
         '''
             image - np.array (3 RGB channels)
 
@@ -147,7 +147,7 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
         if is_yolo_det:
             from rpi_deep_pantilt.detect.util.yolov4 import decode, filter_boxes
             import cv2
-            image_data = cv2.resize(image, (416, 416))
+            image_data = cv2.resize(image, (input_size, input_size))
             image_data = image_data / 255.
             input_tensor = []
             for i in range(1):
@@ -198,15 +198,15 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
             prob_tensors = []
             for i, fm in enumerate(pred):
                 if i == 0:
-                    output_tensors = decode(pred[1], 416 // 16, 3, STRIDES, ANCHORS, i, XYSCALE)
+                    output_tensors = decode(pred[1], input_size // 16, 3, STRIDES, ANCHORS, i, XYSCALE)
                 else:
-                    output_tensors = decode(pred[0], 416 // 32, 3, STRIDES, ANCHORS, i, XYSCALE)
+                    output_tensors = decode(pred[0], input_size // 32, 3, STRIDES, ANCHORS, i, XYSCALE)
                 bbox_tensors.append(output_tensors[0])
                 prob_tensors.append(output_tensors[1])
             pred_bbox = tf.concat(bbox_tensors, axis=1)
             pred_prob = tf.concat(prob_tensors, axis=1)
             pred = (pred_bbox, pred_prob)
-            box_data, pred_conf = filter_boxes(pred[0], pred[1], score_threshold=0.25)
+            box_data, pred_conf = filter_boxes(pred[0], pred[1], score_threshold=0.25, input_shape = tf.constant([input_size,input_size]))
             box_data, score_data, class_data, num_detections = tf.image.combined_non_max_suppression(
                 boxes=tf.reshape(box_data, (tf.shape(box_data)[0], -1, 1, 4)),
                 scores=tf.reshape(

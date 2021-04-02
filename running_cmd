@@ -18,8 +18,9 @@ rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl \
 /home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_v1_quant_70_30_rasp_931_50000/mobilenet_v1_quant_70_30_rasp_931_50000_edgetpu.tflite
 /home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_v2_quant_32_70_30_rasp_931_50000/mobilenet_v2_quant_32_70_30_rasp_931_50000_edgetpu.tflite
 /home/ssl/Documents/msc-project/yolo_v4/backup/yolov4_tiny_rasp_931_416_relu/yolov4_tiny_rasp_931_416_relu_no_leaky_int8_edgetpu.tflite
+/home/ssl/Documents/msc-project/yolo_v4/backup/yolov4_tiny_rasp_931_224_relu/yolov4_tiny_rasp_931_224_relu_int8_edgetpu.tflite
 
-rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl --csv \
-    --model_path=/home/ssl/Documents/msc-project/yolo_v4/backup/yolov4_tiny_rasp_931_416_relu/yolov4_tiny_rasp_931_416_relu_no_leaky_int8_edgetpu.tflite \
+rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl --csv --input_size 224 \
+    --model_path=/home/ssl/Documents/msc-project/yolo_v4/backup/yolov4_tiny_rasp_931_224_relu/yolov4_tiny_rasp_931_224_relu_int8_edgetpu.tflite \
     --imgs_path=/home/ssl/Documents/evaluate_img/gt/imgs \
-    --det_path=/home/ssl/Documents/evaluate_img/yolov4_tiny/annotations
+    --det_path=/home/ssl/Documents/evaluate_img/yolov4_tiny_224/annotations
