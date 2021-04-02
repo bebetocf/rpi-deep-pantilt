@@ -16,9 +16,9 @@ rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl \
 
 /home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobiledet_70_30_rasp_931_50000/mobiledet_70_30_rasp_931_50000_edgetpu.tflite
 /home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_v1_quant_70_30_rasp_931_50000/mobilenet_v1_quant_70_30_rasp_931_50000_edgetpu.tflite
-/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_v2_quant_32_70_30_rasp_931_50000/mobilenet_v2_quant_32_70_30_rasp_931_50000.tflite
+/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_v2_quant_32_70_30_rasp_931_50000/mobilenet_v2_quant_32_70_30_rasp_931_50000_edgetpu.tflite
 
 rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl --csv \
-    --model_path=/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_v2_quant_32_70_30_rasp_931_50000/mobilenet_v2_quant_32_70_30_rasp_931_50000.tflite \
+    --model_path=/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_v2_quant_32_70_30_rasp_931_50000/mobilenet_v2_quant_32_70_30_rasp_931_50000_edgetpu.tflite \
     --imgs_path=/home/ssl/Documents/evaluate_img/gt/imgs \
-    --det_path=/home/ssl/Documents/evaluate_img/mobilenetv2
+    --det_path=/home/ssl/Documents/evaluate_img/mobilenetv2/annotations

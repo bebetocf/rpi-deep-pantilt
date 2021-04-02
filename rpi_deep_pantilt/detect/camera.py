@@ -77,8 +77,8 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
     '''
         Overlay is rendered around all tracked objects
     '''
-    model = model_cls()
-    model.set_model_path(model_path)
+    model = model_cls(model_path_dir=model_path)
+    # model.set_model_path(model_path)
 
     if log_csv:
         import csv
@@ -173,10 +173,10 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                             if filtered_prediction['detection_scores'][qtd_detection] < 0.5:
                                 continue
                             box_det = filtered_prediction['detection_boxes'][qtd_detection]
-                            bb_line = (f'{(box_det[1] * 224):.6f}' + ' ' + \
-                                        f'{(box_det[0] * 224):.6f}' + ' ' + \
-                                        f'{(box_det[3] * 224):.6f}' + ' ' + \
-                                        f'{(box_det[2] * 224):.6f}')
+                            bb_line = (f'{((box_det[1] + box_det[3]) / 2):.6f}' + ' ' + \
+                                        f'{((box_det[0] + box_det[2]) / 2):.6f}' + ' ' + \
+                                        f'{(box_det[3] - box_det[1]):.6f}' + ' ' + \
+                                        f'{(box_det[2] - box_det[0]):.6f}')
                             det_file.write(str(filtered_prediction['detection_classes'][qtd_detection] - 1) + ' ' +
                                         str(filtered_prediction['detection_scores'][qtd_detection]) + ' ' +
                                         bb_line + '\n')

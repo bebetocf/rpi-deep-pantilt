@@ -27,7 +27,8 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
         model_name='ssdlite_mobilenet_edgetpu_coco_quant',
         input_shape=(224, 224),
         min_score_thresh=0.50,
-        tflite_model_file='mobilenet_70_30_raw_whole_3000_edgetpu.tflite'
+        tflite_model_file='mobilenet_70_30_raw_whole_3000_edgetpu.tflite',
+        model_path_dir="/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_70_30_whole_50000/mobilenet_70_30_whole_50000_edgetpu.tflite"
     ):
 
         self.base_url = base_url
@@ -45,7 +46,7 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
 
         self.min_score_thresh = min_score_thresh
 
-        self.model_path = "/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_70_30_whole_50000/mobilenet_70_30_whole_50000_edgetpu.tflite"
+        self.model_path = model_path_dir
         
         try:
             from tflite_runtime import interpreter as coral_tflite_interpreter
