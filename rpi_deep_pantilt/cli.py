@@ -48,12 +48,14 @@ def cli():
 @click.option('--video_path', required=False, type=str, default=None, help='Path to run a video, instead of raspcam')
 @click.option('--save_frame_path', required=False, type=str, default=None, help='Path to save frames and detection')
 @click.option('--save_frame_freq', default=30, type=int, help='Frequency to save frames and detection')
+@click.option('--imgs_path', required=False, type=str, default=None, help='Path to get images')
+@click.option('--det_path', required=False, type=str, default=None, help='Path to save detection')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
 @click.option('--ssl', is_flag=True, required=False, type=bool, default=False, help='Set to use ssl model')
 @click.option('--draw_overlay', is_flag=True, required=False, type=bool, default=False, help='Flag to draw overlay')
 @click.option('--csv', is_flag=True, required=False, type=bool, default=False, help='Flag to save detections on csv')
 @click.option('--rotation', default=0, type=int, help='PiCamera rotation. If you followed this guide, a rotation value of 0 is correct. https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134')
-def detect(labels, model_path, video_path, save_frame_path, save_frame_freq, loglevel, ssl, edge_tpu, draw_overlay,csv, rotation):
+def detect(labels, model_path, video_path, save_frame_path, save_frame_freq, imgs_path, det_path, loglevel, ssl, edge_tpu, draw_overlay,csv, rotation):
     '''
         rpi-deep-pantilt detect [OPTIONS] [LABELS]...
 
@@ -108,7 +110,7 @@ def detect(labels, model_path, video_path, save_frame_path, save_frame_freq, log
             model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
 
     logging.warning(f'Detecting labels: {labels}')
-    run_stationary_detect(labels, model_cls, model_path, rotation, draw_overlay, csv, video_path, save_frame_path, save_frame_freq)
+    run_stationary_detect(labels, model_cls, model_path, rotation, draw_overlay, csv, video_path, save_frame_path, save_frame_freq, imgs_path, det_path)
 
 
 @cli.command()

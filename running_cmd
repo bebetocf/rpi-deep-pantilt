@@ -10,6 +10,15 @@ rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl --csv \
 
 rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl \
     --model_path=/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_90_10_whole_50000/mobilenet_90_10_whole_50000_edgetpu.tflite \
-    --video_path=/home/ssl/Documents/detection_videos/video2.mp4 \
+    --video_path=/home/ssl/Documents/detection_videos/video1.mp4 \
     --save_frame_path=/home/ssl/Documents/detection_frames \
     --save_frame_freq=30
+
+/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobiledet_70_30_rasp_931_50000/mobiledet_70_30_rasp_931_50000_edgetpu.tflite
+/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_v1_quant_70_30_rasp_931_50000/mobilenet_v1_quant_70_30_rasp_931_50000_edgetpu.tflite
+/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_v2_quant_32_70_30_rasp_931_50000/mobilenet_v2_quant_32_70_30_rasp_931_50000.tflite
+
+rpi-deep-pantilt detect --loglevel=INFO --edge-tpu --ssl --csv \
+    --model_path=/home/ssl/Documents/msc-project/mobilenet/exported-models/tf1/mobilenet_v2_quant_32_70_30_rasp_931_50000/mobilenet_v2_quant_32_70_30_rasp_931_50000.tflite \
+    --imgs_path=/home/ssl/Documents/evaluate_img/gt/imgs \
+    --det_path=/home/ssl/Documents/evaluate_img/mobilenetv2

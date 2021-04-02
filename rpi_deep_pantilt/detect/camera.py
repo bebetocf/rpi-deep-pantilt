@@ -73,7 +73,7 @@ def run_pantilt_detect(center_x, center_y, labels, model_cls, rotation, resoluti
                 start_time = time.time()
 
 
-def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, log_csv, video_path, save_frame_path, save_frame_freq):
+def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, log_csv, video_path, save_frame_path, save_frame_freq, imgs_path, det_path):
     '''
         Overlay is rendered around all tracked objects
     '''
@@ -97,8 +97,16 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
     label_idxs = model.label_to_category_index(labels)
     start_time = time.time()
     fps_counter = 0
+    init_img = 865
 
-    if video_path:
+    if imgs_path:
+        import cv2
+        from os import listdir
+        from os.path import isfile, join
+        img_files = [join(imgs_path,f) for f in listdir(imgs_path) if isfile(join(imgs_path, f))]
+    elif det_path:
+        from os.path import join
+    elif video_path:
         import cv2
         cap = cv2.VideoCapture(video_path)
         if draw_boxes:
@@ -124,9 +132,14 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
             capture_manager.start_overlay()
 
     try:
-        while (not video_path and not capture_manager.stopped) or (video_path and cap.isOpened()):
-            if video_path or capture_manager.frame is not None:
-                if video_path:
+        while img_files or (not video_path and not capture_manager.stopped) or (video_path and cap.isOpened()):
+            if img_files or video_path or capture_manager.frame is not None:
+                start_time = time.time()
+                if img_files:
+                    frame_path = img_files.pop()
+                    frame = cv2.imread(frame_path)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                elif video_path:
                     _, frame = cap.read()
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     frame_count = frame_count + 1
@@ -150,19 +163,36 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                         overlay = model.create_overlay(frame, filtered_prediction, video_path)
                         if not video_path:
                             capture_manager.overlay_buff = overlay
+                    
+                    detection_time_ms = (time.time() - start_time) * 1000
+                    logging.info(f'det - time: {detection_time_ms}ms')
+                    if det_path:
+                        det_file_path = join(det_path, frame_path.split('/')[-1].split('.')[0] + '.txt')
+                        det_file = open(det_file_path, "w")
+                        for qtd_detection in range(len(filtered_prediction['detection_scores'])):
+                            if filtered_prediction['detection_scores'][qtd_detection] < 0.5:
+                                continue
+                            box_det = filtered_prediction['detection_boxes'][qtd_detection]
+                            bb_line = (f'{(box_det[1] * 224):.6f}' + ' ' + \
+                                        f'{(box_det[0] * 224):.6f}' + ' ' + \
+                                        f'{(box_det[3] * 224):.6f}' + ' ' + \
+                                        f'{(box_det[2] * 224):.6f}')
+                            det_file.write(str(filtered_prediction['detection_classes'][qtd_detection] - 1) + ' ' +
+                                        str(filtered_prediction['detection_scores'][qtd_detection]) + ' ' +
+                                        bb_line + '\n')
                     # for class_name in prediction.get('detection_classes'):
                     #     logging.info(
                     #         f'Tracking {class_name}')
 
-                detection_time_ms = (time.time() - start_time) * 1000
-                logging.info(f'det - time: {detection_time_ms}ms')
+                # detection_time_ms = (time.time() - start_time) * 1000
+                # logging.info(f'det - time: {detection_time_ms}ms')
 
                 if video_path:
                     if draw_boxes:
                         output_rgb = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                         out.write(output_rgb)
                     if save_frame_path and not (frame_count % save_frame_freq):
-                        count_string = f'{frame_count:05d}'
+                        count_string = f'{init_img:05d}'
                         cv2.imwrite(os.path.join(frames_path, count_string + '.jpg'), cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
                         det_frame_file = open(os.path.join(detection_path, count_string + '.txt'), 'w')
                         for qtd_detection in range(10):
@@ -177,6 +207,7 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                                         f'{(box_det[2] - box_det[0]):.6f}')
                             det_frame_file.write(bb_line + '\n')
                         det_frame_file.close()
+                        init_img += 1
 
                 if log_csv:
                     csv_writer.writerow(np.concatenate((np.array(filtered_prediction['detection_boxes']).ravel(),
@@ -184,7 +215,6 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                                         np.array(filtered_prediction['detection_scores']),
                                         np.array([detection_time_ms]))))
                 # logging.info(f'det - FPS: {1 / (time.time() - start_time)}')
-                start_time = time.time()
     except KeyboardInterrupt:
         if video_path:
             cap.release()
