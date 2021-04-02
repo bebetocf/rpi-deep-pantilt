@@ -132,7 +132,7 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
 
         return img.tobytes()
 
-    def predict(self, image):
+    def predict(self, image, is_yolo_det):
         '''
             image - np.array (3 RGB channels)
 
@@ -144,16 +144,26 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
                 }
         '''
 
-        image = np.asarray(image)
-        # normalize 0 - 255 RGB to values between (-1, 1)
-        #image = (image / 128.0) - 1
+        if is_yolo_det:
+            from rpi_deep_pantilt.detect.util.yolov4 import decode, filter_boxes
+            import cv2
+            image_data = cv2.resize(image, (416, 416))
+            image_data = image_data / 255.
+            input_tensor = []
+            for i in range(1):
+                input_tensor.append(image_data)
+            input_tensor = np.asarray(input_tensor).astype(np.float32)
+        else:
+            image = np.asarray(image)
+            # normalize 0 - 255 RGB to values between (-1, 1)
+            #image = (image / 128.0) - 1
 
-        # The input needs to be a tensor, convert it using `tf.convert_to_tensor`.
+            # The input needs to be a tensor, convert it using `tf.convert_to_tensor`.
 
-        input_tensor = tf.convert_to_tensor(image, dtype=tf.uint8)
+            input_tensor = tf.convert_to_tensor(image, dtype=tf.uint8)
 
-        # The model expects a batch of images, so add an axis with `tf.newaxis`.
-        input_tensor = input_tensor[tf.newaxis, ...]
+            # The model expects a batch of images, so add an axis with `tf.newaxis`.
+            input_tensor = input_tensor[tf.newaxis, ...]
 
         # Run inference
         self.tflite_interpreter.set_tensor(
@@ -178,14 +188,41 @@ class SSDMobileDet_SSL_EdgeTPU_Quant(object):
         #     [1, num_anchors, num_classes] containing the class scores for each anchor
         #     after applying score conversion.
 
-        box_data = tf.convert_to_tensor(self.tflite_interpreter.get_tensor(
-            self.output_details[0]['index']))
-        class_data = tf.convert_to_tensor(self.tflite_interpreter.get_tensor(
-            self.output_details[1]['index']))
-        score_data = tf.convert_to_tensor(self.tflite_interpreter.get_tensor(
-            self.output_details[2]['index']))
-        num_detections = tf.convert_to_tensor(self.tflite_interpreter.get_tensor(
-            self.output_details[3]['index']))
+        pred = [self.tflite_interpreter.get_tensor(self.output_details[i]['index']) for i in range(len(self.output_details))]
+        if is_yolo_det:
+            from rpi_deep_pantilt.detect.util.yolov4 import get_anchors
+            STRIDES = np.array([16, 32])
+            ANCHORS = get_anchors([23,27, 37,58, 81,82, 81,82, 135,169, 344,319])
+            XYSCALE = [1.05, 1.05]
+            bbox_tensors = []
+            prob_tensors = []
+            for i, fm in enumerate(pred):
+                if i == 0:
+                    output_tensors = decode(pred[1], 416 // 16, 3, STRIDES, ANCHORS, i, XYSCALE)
+                else:
+                    output_tensors = decode(pred[0], 416 // 32, 3, STRIDES, ANCHORS, i, XYSCALE)
+                bbox_tensors.append(output_tensors[0])
+                prob_tensors.append(output_tensors[1])
+            pred_bbox = tf.concat(bbox_tensors, axis=1)
+            pred_prob = tf.concat(prob_tensors, axis=1)
+            pred = (pred_bbox, pred_prob)
+            box_data, pred_conf = filter_boxes(pred[0], pred[1], score_threshold=0.25)
+            box_data, score_data, class_data, num_detections = tf.image.combined_non_max_suppression(
+                boxes=tf.reshape(box_data, (tf.shape(box_data)[0], -1, 1, 4)),
+                scores=tf.reshape(
+                    pred_conf, (tf.shape(pred_conf)[0], -1, tf.shape(pred_conf)[-1])),
+                max_output_size_per_class=50,
+                max_total_size=50,
+                iou_threshold=0.45,
+                score_threshold=0.25
+            )
+            pred_bbox = [box_data.numpy(), score_data.numpy(), class_data.numpy(), num_detections.numpy()]
+
+        else:
+            box_data = tf.convert_to_tensor(pred[0])
+            class_data = tf.convert_to_tensor(pred[1])
+            score_data = tf.convert_to_tensor(pred[2])
+            num_detections = tf.convert_to_tensor(pred[3])
 
         class_data = tf.squeeze(
             class_data, axis=[0]).numpy().astype(np.int64) + 1

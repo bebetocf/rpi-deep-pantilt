@@ -99,6 +99,10 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
     fps_counter = 0
     init_img = 865
 
+    is_yolo_det = 'yolo' in model_path
+    if is_yolo_det:
+        import cv2
+
     if imgs_path:
         import cv2
         from os import listdir
@@ -146,7 +150,7 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                 else:
                     frame = capture_manager.read()
 
-                prediction = model.predict(frame)
+                prediction = model.predict(frame, is_yolo_det)
 
                 if not len(prediction.get('detection_boxes')):
                     continue
@@ -173,10 +177,16 @@ def run_stationary_detect(labels, model_cls, model_path, rotation, draw_boxes, l
                             if filtered_prediction['detection_scores'][qtd_detection] < 0.5:
                                 continue
                             box_det = filtered_prediction['detection_boxes'][qtd_detection]
-                            bb_line = (f'{((box_det[1] + box_det[3]) / 2):.6f}' + ' ' + \
-                                        f'{((box_det[0] + box_det[2]) / 2):.6f}' + ' ' + \
-                                        f'{(box_det[3] - box_det[1]):.6f}' + ' ' + \
-                                        f'{(box_det[2] - box_det[0]):.6f}')
+                            if False:
+                                bb_line = (f'{(box_det[0]):.6f}' + ' ' + \
+                                            f'{(box_det[1]):.6f}' + ' ' + \
+                                            f'{(box_det[2]):.6f}' + ' ' + \
+                                            f'{(box_det[3]):.6f}')
+                            else:
+                                bb_line = (f'{((box_det[1] + box_det[3]) / 2):.6f}' + ' ' + \
+                                            f'{((box_det[0] + box_det[2]) / 2):.6f}' + ' ' + \
+                                            f'{(box_det[3] - box_det[1]):.6f}' + ' ' + \
+                                            f'{(box_det[2] - box_det[0]):.6f}')
                             det_file.write(str(filtered_prediction['detection_classes'][qtd_detection] - 1) + ' ' +
                                         str(filtered_prediction['detection_scores'][qtd_detection]) + ' ' +
                                         bb_line + '\n')
